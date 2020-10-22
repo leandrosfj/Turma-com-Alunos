@@ -8,6 +8,9 @@
 #include <iomanip>
 #include <cassert>
 
+using std::cout;
+using std::endl;
+
 Funcionario::Funcionario(string nome, double salario, date nascimento, date admissao):
     nome(nome), salario(salario), nascimento(nascimento), admissao(admissao){
     ativos++;

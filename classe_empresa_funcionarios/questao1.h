@@ -1,0 +1,14 @@
+//
+// Created by leandro on 10/22/20.
+//
+
+#ifndef CLASSE_EMPRESA_FUNCIONARIOS_QUESTAO1_H
+#define CLASSE_EMPRESA_FUNCIONARIOS_QUESTAO1_H
+
+
+class questao1 {
+
+};
+
+
+#endif //CLASSE_EMPRESA_FUNCIONARIOS_QUESTAO1_H
