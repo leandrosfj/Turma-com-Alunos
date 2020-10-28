@@ -19,5 +19,4 @@ public:
     int getValor();
 };
 
-
 #endif //JOGO_DADOS_DADO_HPP
