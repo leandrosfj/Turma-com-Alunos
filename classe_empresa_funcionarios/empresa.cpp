@@ -15,7 +15,9 @@ Empresa::Empresa(string nome, string cnpj):nome(nome), cnpj(cnpj){
 Empresa::Empresa(const Empresa &copia){
     this->nome = copia.nome;
     this->cnpj = copia.cnpj;
-    //BUG: this->empregados = copia.empregados;
+    for (const auto &empregado : copia.empregados) {
+        this->empregados.push_back(new Funcionario(*empregado));
+    }
     ativas++;
 }
 
@@ -74,6 +76,7 @@ int Empresa::aplicarAumento(double percentual){
     for (Funcionario* &empregado : this->empregados){
         empregado->setSalario(empregado->getSalario()*(percentual+1));
     }
+    return this->empregados.size();
 }
 
 int Empresa::getAtivas(){
@@ -82,4 +85,5 @@ int Empresa::getAtivas(){
 
 std::ostream& operator<< (std::ostream &o, Empresa const e){
     o << e.nome << " - " << e.cnpj << " [" << e.empregados.size() << " funcionários]";
+    return o;
 }

@@ -2,13 +2,27 @@
 // Created by leandro on 10/22/20.
 //
 
-#ifndef CLASSE_EMPRESA_FUNCIONARIOS_QUESTAO1_H
-#define CLASSE_EMPRESA_FUNCIONARIOS_QUESTAO1_H
+#ifndef QUESTAO1_H
+#define QUESTAO1_H
 
+#include "empresa.h"
 
-class questao1 {
+#include <vector>
+#include <string>
 
+using std::vector;
+
+class Questao1 {
+public:
+    Questao1();
+    ~Questao1();
+    void listarEmpresas();
+    bool adicionaEmpresa(Empresa* nova);
+    bool removeEmpresa(string nome);
+    void testar();
+    int mediaFuncionarios();
+private:
+    vector<Empresa*> empresas;
 };
 
-
-#endif //CLASSE_EMPRESA_FUNCIONARIOS_QUESTAO1_H
+#endif //QUESTAO1_H
