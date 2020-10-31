@@ -198,7 +198,11 @@ int Agencia::menuPrincipal(){
                 if (this->listaContas()) {
                     cout << "Digite o número da conta: ";
                     cin >> n_conta;
-                    op = this->menuConta(n_conta);
+                    while (op = this->menuConta(n_conta) == 0){
+                        cout << "Conta não encontrada" << endl
+                        << "Digite o número da conta: " << endl;
+                        cin >> n_conta;
+                    }
                 }
                 break;
 
@@ -235,10 +239,12 @@ int Agencia::menuConta(string n_conta){
 
     int opcao;
     int valor;
+    int flag = 0;
     string destino;
 
     for (auto &conta : this->contas) {
         if (conta->getNumero()==n_conta) {
+            flag = 1;
             do {
                 cout << "Menu - Conta [" << conta->getNumero() << "]" << endl
                     << "(1) Saque" << endl
@@ -286,9 +292,9 @@ int Agencia::menuConta(string n_conta){
                         } else{
                             cout << "Erro ao excluir conta" << endl;
                         }
-                        return 0;
+                        return 1;
                     case 7:
-                        return 0;
+                        return 1;
                     case 8:
                         return 4;
                     default:
@@ -299,10 +305,7 @@ int Agencia::menuConta(string n_conta){
             break;
 
         }
-        /*else{
-            cout << "Conta não encontrada" << endl;
-            break;
-        }*/
+
     }
-    return 0;
+    return flag;
 }
