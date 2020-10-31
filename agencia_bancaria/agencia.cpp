@@ -4,12 +4,17 @@
 
 #include "agencia.h"
 #include <iostream>
+#include <vector>
 
+
+using std::vector;
 using std::cin;
 using std::cout;
 using std::endl;
 
-Agencia::Agencia(string nome, string numero, string banco): nome(nome),numero(numero),banco(banco){}
+Agencia::Agencia(string nome, string numero, string banco): nome(nome),numero(numero),banco(banco){
+    this->menuPrincipal();
+}
 
 Agencia::~Agencia(){}
 
@@ -39,7 +44,7 @@ bool Agencia::criarConta(){
     double saldo;
     TipoConta tipo = contaNormal;
     double limite;
-    char ctipo = 0;
+    char ctipo;
 
     cout << "Número da conta: ";
     cin >> numero;
@@ -53,15 +58,24 @@ bool Agencia::criarConta(){
         } else if (ctipo == 'E' || ctipo == 'e') {
             tipo = contaEspecial;
         }
-    } while (ctipo != 'N' || ctipo != 'n' || ctipo != 'E' || ctipo != 'e');
-    cout << "Limite disponível: ";
+    } while (ctipo != 'e' && ctipo != 'n' && ctipo != 'N' && ctipo != 'E');
+    cout << "Limite autorizado: ";
     cin >> limite;
     return adicionaConta(new ContaCorrente(this->numero,numero,saldo,tipo,limite));
 }
 
-bool Agencia::excluirConta(){
-    //implementar
-    return true;
+bool Agencia::excluirConta(string numero_conta){
+
+    int index = 0;
+    auto pos = this->contas.begin();
+    for (auto &conta : this->contas) {
+        if (conta->getNumero()==numero_conta) {
+            this->contas.erase(pos+index);
+            return true;
+        }
+        index++;
+    }
+    return false;
 }
 
 bool Agencia::saque(string numero_conta, double valor){
@@ -70,10 +84,8 @@ bool Agencia::saque(string numero_conta, double valor){
         if (conta->getNumero()==numero_conta) {
             Movimentacao saque("Saque no terminal",valor,tipoDebito);
             if (conta->processaMovimentacao(saque)) {
-                cout << "Saque realizado com sucesso" << endl;
-                cout << "Saldo em conta: R$ " << conta->getSaldo() << endl;
-
-                //falta printar o limite em todas as funções
+                cout << "Saque de R$" << valor << " realizado com sucesso" << endl;
+                saldo(conta->getNumero());
                 return true;
             }
         }
@@ -88,13 +100,14 @@ bool Agencia::deposito(string numero_conta, double valor){
         if (conta->getNumero()==numero_conta) {
             Movimentacao deposito("Depósito em conta",valor,tipoCredito);
             if (conta->processaMovimentacao(deposito)) {
-                cout << "Depósito realizado com sucesso" << endl;
-                cout << "Saldo em conta: R$ " << conta->getSaldo() << endl;
+                cout << "Depósito de R$" << valor << " realizado com sucesso" << endl;
+                saldo(conta->getNumero());
                 return true;
             }
         }
     }
     cout << "ERRO: Transação não realizada" << endl;
+    cout << endl;
     return false;
 }
 
@@ -102,6 +115,9 @@ bool Agencia::saldo(string numero_conta) const{
     for (auto &conta : this->contas) {
         if (conta->getNumero()==numero_conta) {
             cout << "Saldo em conta: R$ " << conta->getSaldo() << endl;
+            cout << "Limite autorizado: R$ " << conta->getLimite() << endl;
+            cout << "Limite total disponível: R$ " << (conta->getSaldo()+conta->getLimite()) << endl;
+            cout << endl;
         }
     }
     return true;
@@ -112,8 +128,7 @@ bool Agencia::extrato(string numero_conta) const{
         if (conta->getNumero()==numero_conta) {
             cout << "Extrato da conta [" << conta->getNumero() << "]:" << endl;
             conta->mostraHistorico();
-            cout << "Saldo em conta: R$ " << conta->getSaldo() << endl;
-            cout << endl;
+            saldo(conta->getNumero());
         }
     }
     return true;
@@ -125,9 +140,11 @@ bool Agencia::tranferencia(string conta_origem, string conta_destino, double val
         if (conta->getNumero()==conta_origem) {
             Movimentacao transferencia("Transferência entre contras",valor,tipoDebito);
             if (conta->processaMovimentacao(transferencia)) {
-                cout << "Transferência realizado com sucesso" << endl;
+                cout << "Transferência de R$" << valor << " realizada com sucesso" << endl;
+                saldo(conta->getNumero());
             } else{
                 cout << "ERRO: Você não possui limite para realizar esta transação." << endl;
+                cout << endl;
                 return false;
             }
             break;
@@ -143,8 +160,149 @@ bool Agencia::tranferencia(string conta_origem, string conta_destino, double val
     return true;
 }
 
-void Agencia::listaContas() const{
-    for (auto& conta: this->contas){
-        cout << "Conta " << conta->getNumero() << "  |  Saldo: R$" << conta->getSaldo() << endl;
+bool Agencia::listaContas() const{
+
+    if (contas.size() == 0){
+        cout << "Nenhuma conta cadastrada" << endl << endl;
+        return false;
+    } else {
+        cout << "Contas cadastradas:" << endl;
+        for (auto &conta: this->contas) {
+            cout << "Agência [" << conta->getAgencia() << "] - Conta [" << conta->getNumero() << "]" << endl;
+        }
+        cout << endl;
+        return true;
     }
+}
+
+int Agencia::menuPrincipal(){
+    int op;
+    char acessar;
+
+    cout << "==============================================" << endl;
+    cout << this->banco << " - " << this->nome << " [" << this->numero << "]" << endl << endl;
+
+    do {
+
+        cout << "Menu Principal:" << endl
+             << "(1) Acessar minha conta" << endl
+             << "(2) Mostrar contas cadastradas" << endl
+             << "(3) Abrir conta" << endl
+             << "(4) Sair do sistema" << endl;
+
+        cin >> op;
+
+        string n_conta;
+        switch (op) {
+            case 1:
+                if (this->listaContas()) {
+                    cout << "Digite o número da conta: ";
+                    cin >> n_conta;
+                    op = this->menuConta(n_conta);
+                }
+                break;
+
+            case 2:
+                this->listaContas();
+                break;
+
+            case 3:
+                if (this->criarConta()){
+                    cout << "Conta criada com sucesso" << endl
+                    << "Deseja acessar sua nova conta? (S|N)" << endl;
+                    cin >> acessar;
+                    if(acessar=='s' || acessar=='S'){
+                        op = this->menuConta(contas.back()->getNumero());
+                    }
+                }
+                break;
+
+            case 4:
+                cout << "===================" << endl
+                    << "Sessão encerrada" << endl
+                    << "===================" << endl;
+                return 0;
+
+            default:
+                cout << "Opção inválida" << endl << endl;
+
+        }
+    } while (op!=4);
+    return 0;
+}
+
+int Agencia::menuConta(string n_conta){
+
+    int opcao;
+    int valor;
+    string destino;
+
+    for (auto &conta : this->contas) {
+        if (conta->getNumero()==n_conta) {
+            do {
+                cout << "Menu - Conta [" << conta->getNumero() << "]" << endl
+                    << "(1) Saque" << endl
+                    << "(2) Depósito" << endl
+                    << "(3) Transferência" << endl
+                    << "(4) Saldo" << endl
+                    << "(5) Extrato" << endl
+                    << "(6) Fechar minha conta" << endl
+                    << "(7) Voltar ao menu principal" << endl
+                    << "(8) Encerrar sessão" << endl;
+
+                cin >> opcao;
+                switch (opcao) {
+                    case 1:
+                        cout << "Digite o valor: ";
+                        cin >> valor;
+                        this->saque(n_conta, valor);
+                        break;
+
+                    case 2:
+                        cout << "Digite o valor: ";
+                        cin >> valor;
+                        this->deposito(n_conta, valor);
+                        break;
+
+                    case 3:
+                        cout << "Digite o valor: ";
+                        cin >> valor;
+                        cout << "Digite a conta destino:";
+                        cin >> destino;
+                        this->tranferencia(n_conta, destino, valor);
+                        break;
+
+                    case 4:
+                        this->saldo(n_conta);
+                        break;
+
+                    case 5:
+                        this->extrato(n_conta);
+                        break;
+
+                    case 6:
+                        if (this->excluirConta(n_conta)){
+                            cout << "Conta excluída com sucesso" << endl << endl;
+                        } else{
+                            cout << "Erro ao excluir conta" << endl;
+                        }
+                        return 0;
+                    case 7:
+                        return 0;
+                    case 8:
+                        return 4;
+                    default:
+                        cout << "Opção inválida" << endl << endl;
+                }
+            } while (opcao!=7);
+
+            break;
+
+        }
+        /*else{
+            cout << "Conta não encontrada" << endl;
+            break;
+        }*/
+    }
+    return 0;
 }

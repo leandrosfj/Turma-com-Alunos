@@ -28,13 +28,15 @@ public:
     int getTotalContas() const;
     bool adicionaConta(ContaCorrente* nova);
     bool criarConta();
-    bool excluirConta();
+    bool excluirConta(string numero_conta);
     bool saque(string numero_conta, double valor);
     bool deposito(string numero_conta, double valor);
     bool saldo(string numero_conta) const;
     bool extrato(string numero_conta) const;
     bool tranferencia(string conta_origem, string conta_destino, double valor);
-    void listaContas() const;
+    bool listaContas() const;
+    int menuPrincipal();
+    int menuConta(string conta);
 };
 
 #endif //AGENCIA_BANCARIA_AGENCIA_H
