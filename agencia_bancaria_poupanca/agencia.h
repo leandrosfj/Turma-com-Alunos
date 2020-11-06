@@ -5,7 +5,10 @@
 #ifndef AGENCIA_BANCARIA_AGENCIA_H
 #define AGENCIA_BANCARIA_AGENCIA_H
 
+#include "conta.h"
 #include "contacorrente.h"
+#include "contapoupanca.h"
+#include "date.h"
 
 #include <vector>
 #include <string>
@@ -18,23 +21,23 @@ private:
     string nome;
     string numero;
     string banco;
-    vector<ContaCorrente*> contas;
+    date hoje;
+    vector<Conta*> contas;
 public:
-    Agencia(string nome, string numero, string banco);
+    Agencia(string nome, string numero, string banco, date hoje);
     ~Agencia();
-    string getNome() const;
-    string getNumero() const;
-    string getBanco() const;
-    int getTotalContas() const;
-    bool adicionaConta(ContaCorrente* nova);
+
+    bool adicionaConta(Conta* nova);
     bool criarConta();
     bool excluirConta(string numero_conta);
     bool saque(string numero_conta, double valor);
     bool deposito(string numero_conta, double valor);
     bool saldo(string numero_conta) const;
     bool extrato(string numero_conta) const;
-    bool tranferencia(string conta_origem, string conta_destino, double valor);
+    bool transferencia(string conta_origem, string conta_destino, double valor);
     bool listaContas() const;
+    bool simula1Mes();
+
     int menuPrincipal();
     int menuConta(string conta);
 };

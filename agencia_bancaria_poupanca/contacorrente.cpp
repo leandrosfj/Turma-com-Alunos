@@ -3,30 +3,13 @@
 //
 
 #include "contacorrente.h"
-#include <iostream>
 
-ContaCorrente::ContaCorrente(string agencia, string numero, double saldo, TipoConta tipo, double limite):
-        agencia(agencia),numero(numero),saldo(saldo), tipo(tipo), limite(limite){}
+ContaCorrente::ContaCorrente(bool type, string agencia, string numero, double saldo, double limite, date abertura):
+        Conta(type,agencia,numero,saldo,abertura), limite(limite){}
 
 ContaCorrente::~ContaCorrente(){}
 
-string ContaCorrente::getAgencia() const{
-    return this->agencia;
-}
-
-string ContaCorrente::getNumero() const{
-    return this->numero;
-}
-
-double ContaCorrente::getSaldo() const{
-    return this->saldo;
-}
-
-TipoConta ContaCorrente::getTipoConta() const{
-    return this->tipo;
-}
-
-double ContaCorrente::getLimite() const{
+double ContaCorrente::getLimite(){
     return this->limite;
 }
 
@@ -43,12 +26,23 @@ bool ContaCorrente::processaMovimentacao(Movimentacao& transacao){
         this->saldo -= transacao.getValor();
         this->historico.push_back(transacao);
         return true;
+    }else if (transacao.getTipo()==tipoJuros) {
+
+        this->saldo += transacao.getValor();
+        this->historico.push_back(transacao);
+        return true;
     }
+
     return false;
 }
 
-void ContaCorrente::mostraHistorico(){
-    for (auto &mov : this->historico){
-        std::cout << mov << std::endl;
+bool ContaCorrente::processaTaxa(){
+    double juros;
+    if(this->saldo >=0 ){
+        juros = 0;
+    } else{
+        juros = this->saldo*0.08;
     }
+    Movimentacao jurosmensal("Cobrança de Juros",juros,tipoJuros);
+    return processaMovimentacao(jurosmensal);
 }

@@ -12,10 +12,6 @@ Movimentacao::Movimentacao(string descricao, double valor, TipoMovimentacao tipo
 
 Movimentacao::~Movimentacao(){}
 
-string Movimentacao::getDescricao() const{
-    return this->descricao;
-}
-
 double Movimentacao::getValor() const{
     return this->valor;
 }
@@ -26,9 +22,21 @@ TipoMovimentacao Movimentacao::getTipo() const{
 
 std::ostream& operator<< (std::ostream &o, Movimentacao const m) {
     string type;
-    if  (m.tipo==0){
-        type = "Crédito";
-    } else type = "Débito";
+
+    switch (m.tipo) {
+        case 0:
+            type = "Crédito";
+            break;
+        case 1:
+            type = "Débito";
+            break;
+        case 2:
+            type = "Rendimento";
+            break;
+        case 3:
+            type = "Juros";
+            break;
+    }
 
     o << setfill ('_') << setw (35) << m.descricao
         << setfill (' ') << setw (10) << " |  Valor: R$ "

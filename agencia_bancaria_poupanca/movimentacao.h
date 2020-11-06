@@ -12,7 +12,9 @@ using std::string;
 enum TipoMovimentacao
 {
     tipoCredito,
-    tipoDebito
+    tipoDebito,
+    tipoRendimento,
+    tipoJuros
 };
 
 class Movimentacao
@@ -24,7 +26,6 @@ private:
 public:
     Movimentacao(string descricao, double valor, TipoMovimentacao tipo);
     ~Movimentacao();
-    string getDescricao() const;
     double getValor() const;
     TipoMovimentacao getTipo() const;
     friend std::ostream& operator<< (std::ostream &o, Movimentacao const m);

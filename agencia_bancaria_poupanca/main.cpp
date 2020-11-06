@@ -7,8 +7,8 @@ using std::endl;
 
 int main(int argc, char const *argv[])
 {
-
-    Agencia ag("Agência Central", "2304-1","Banco Quebrado S/A");
+    date hoje = date(5,11,2020);
+    Agencia ag("Agência Central", "2304-1","Banco Quebrado S/A", hoje);
 
     return 0;
 }

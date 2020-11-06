@@ -6,62 +6,45 @@
 #include <iostream>
 #include <vector>
 
-
 using std::vector;
 using std::cin;
 using std::cout;
 using std::endl;
 
-Agencia::Agencia(string nome, string numero, string banco): nome(nome),numero(numero),banco(banco){
+Agencia::Agencia(string nome, string numero, string banco, date hoje): nome(nome),numero(numero),banco(banco), hoje(hoje){
     this->menuPrincipal();
 }
 
 Agencia::~Agencia(){}
 
-string Agencia::getNome() const{
-    return this->nome;
-}
-
-string Agencia::getNumero() const{
-    return this->numero;
-}
-
-string Agencia::getBanco() const{
-    return this->banco;
-}
-
-int Agencia::getTotalContas() const{
-    return this->contas.size();
-}
-
-bool Agencia::adicionaConta(ContaCorrente* nova){
+bool Agencia::adicionaConta(Conta* nova){
     this->contas.push_back(nova);
     return true;
 }
 
 bool Agencia::criarConta(){
-    string numero;
+    string conta;
     double saldo;
-    TipoConta tipo = contaNormal;
     double limite;
     char ctipo;
 
     cout << "Número da conta: ";
-    cin >> numero;
+    cin >> conta;
     cout << "Saldo inicial: ";
     cin >> saldo;
     do{
-        cout << "Conta Normal ou Especial? (N/E): ";
+        cout << "Conta Corrente ou Poupança? (C/P): ";
         cin >> ctipo;
-        if (ctipo == 'N' || ctipo == 'n') {
-            tipo = contaNormal;
-        } else if (ctipo == 'E' || ctipo == 'e') {
-            tipo = contaEspecial;
+        if (ctipo == 'C' || ctipo == 'c') {
+            cout << "Limite autorizado: ";
+            cin >> limite;
+            return adicionaConta(new ContaCorrente(0,this->numero,conta,saldo,limite,hoje));
+        } else if (ctipo == 'P' || ctipo == 'p') {
+            return adicionaConta(new ContaPoupanca(1,this->numero,conta,saldo,hoje));
         }
-    } while (ctipo != 'e' && ctipo != 'n' && ctipo != 'N' && ctipo != 'E');
-    cout << "Limite autorizado: ";
-    cin >> limite;
-    return adicionaConta(new ContaCorrente(this->numero,numero,saldo,tipo,limite));
+    } while (ctipo != 'P' && ctipo != 'p' && ctipo != 'C' && ctipo != 'c');
+
+    return false;
 }
 
 bool Agencia::excluirConta(string numero_conta){
@@ -112,15 +95,20 @@ bool Agencia::deposito(string numero_conta, double valor){
 }
 
 bool Agencia::saldo(string numero_conta) const{
+
     for (auto &conta : this->contas) {
         if (conta->getNumero()==numero_conta) {
-            cout << "Saldo em conta: R$ " << conta->getSaldo() << endl;
-            cout << "Limite autorizado: R$ " << conta->getLimite() << endl;
-            cout << "Limite total disponível: R$ " << (conta->getSaldo()+conta->getLimite()) << endl;
-            cout << endl;
+            if(conta->getType()==0){
+                cout << "Saldo em conta: R$ " << conta->getSaldo() << endl;
+                cout << "Limite autorizado: R$ " << conta->getLimite() << endl;
+                cout << "Limite total disponível: R$ " << (conta->getSaldo() + conta->getLimite()) << endl;
+                cout << endl;
+            } else if(conta->getType()==1){
+                cout << "Saldo em conta: R$ " << conta->getSaldo() << endl << endl;
+            }
         }
     }
-    return true;
+    return false;
 }
 
 bool Agencia::extrato(string numero_conta) const{
@@ -134,7 +122,7 @@ bool Agencia::extrato(string numero_conta) const{
     return true;
 }
 
-bool Agencia::tranferencia(string conta_origem, string conta_destino, double valor){
+bool Agencia::transferencia(string conta_origem, string conta_destino, double valor){
 
     for (auto &conta : this->contas) {
         if (conta->getNumero()==conta_origem) {
@@ -168,11 +156,27 @@ bool Agencia::listaContas() const{
     } else {
         cout << "Contas cadastradas:" << endl;
         for (auto &conta: this->contas) {
-            cout << "Agência [" << conta->getAgencia() << "] - Conta [" << conta->getNumero() << "]" << endl;
+            cout << "Agência [" << conta->getAgencia() << "] - Conta [" << conta->getNumero() << "] - ";
+            if (conta->getType() == 0){
+                cout << "CONTA CORRENTE" << endl;
+            } else if(conta->getType() ==1){
+                cout << "CONTA POUPANÇA" << endl;
+            }
+
         }
         cout << endl;
         return true;
     }
+}
+
+bool Agencia::simula1Mes(){
+    int mes = this->hoje.month()+1;
+    hoje.setmonth(mes);
+
+    for (auto &conta : this->contas) {
+        conta->processaTaxa();
+    }
+    return true;
 }
 
 int Agencia::menuPrincipal(){
@@ -180,15 +184,17 @@ int Agencia::menuPrincipal(){
     char acessar;
 
     cout << "==============================================" << endl;
-    cout << this->banco << " - " << this->nome << " [" << this->numero << "]" << endl << endl;
+    cout << this->banco << " - " << this->nome << " [" << this->numero << "]" << endl;
 
     do {
 
-        cout << "Menu Principal:" << endl
+        cout << "Data atual: " << this->hoje << endl << endl
+             << "## Menu Principal: ##" << endl
              << "(1) Acessar minha conta" << endl
              << "(2) Mostrar contas cadastradas" << endl
              << "(3) Abrir conta" << endl
-             << "(4) Sair do sistema" << endl;
+             << "(4) Sair do sistema" << endl
+             << "(5) Simular +1 mês" << endl;
 
         cin >> op;
 
@@ -226,6 +232,10 @@ int Agencia::menuPrincipal(){
                     << "Sessão encerrada" << endl
                     << "===================" << endl;
                 return 0;
+
+            case 5:
+                simula1Mes();
+                break;
 
             default:
                 cout << "Opção inválida" << endl << endl;
@@ -275,7 +285,7 @@ int Agencia::menuConta(string n_conta){
                         cin >> valor;
                         cout << "Digite a conta destino:";
                         cin >> destino;
-                        this->tranferencia(n_conta, destino, valor);
+                        this->transferencia(n_conta, destino, valor);
                         break;
 
                     case 4:

@@ -5,38 +5,18 @@
 #ifndef AGENCIA_BANCARIA_CONTACORRENTE_H
 #define AGENCIA_BANCARIA_CONTACORRENTE_H
 
-#include "movimentacao.h"
+#include "conta.h"
 
-#include <string>
-#include <vector>
-
-using std::string;
-using std::vector;
-
-enum TipoConta{
-    contaNormal,
-    contaEspecial
-};
-
-class ContaCorrente
-{
+class ContaCorrente : public Conta {
 public:
-    ContaCorrente(string agencia, string numero, double saldo, TipoConta tipo, double limite);
+    ContaCorrente(bool type, string agencia, string numero, double saldo, double limite, date abertura);
     ~ContaCorrente();
-    string getAgencia() const;
-    string getNumero() const;
-    double getSaldo() const;
-    TipoConta getTipoConta() const;
-    double getLimite() const;
+
+    double getLimite();
     bool processaMovimentacao(Movimentacao& transacao);
-    void mostraHistorico();
+    bool processaTaxa();
 private:
-    string agencia;
-    string numero;
-    double saldo;
-    TipoConta tipo;
     double limite;
-    vector<Movimentacao> historico;
 };
 
 #endif //AGENCIA_BANCARIA_CONTACORRENTE_H
